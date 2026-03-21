@@ -59,10 +59,11 @@ public class TreeFloodFill {
 
                     if(blockState.isIn(BlockTags.LEAVES)) {
                         hasLeaves = true;
-//                        continue;
-                        foundBlocks.add(new TreeBlock(sampledAroundPosition, TreeBlockType.Leaves));
-                        nextPositionsToSample.add(sampledAroundPosition);
+
                         continue;
+//                        foundBlocks.add(new TreeBlock(sampledAroundPosition, TreeBlockType.Leaves));
+//                        nextPositionsToSample.add(sampledAroundPosition);
+//                        continue;
                     }
                 }
             }

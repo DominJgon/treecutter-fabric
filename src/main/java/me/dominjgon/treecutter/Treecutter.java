@@ -6,24 +6,36 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Properties;
+
 public class Treecutter implements ModInitializer {
 
     public static final String MOD_ID = "treecutter";
     private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    private final TreecutterManager treecutterManager = new TreecutterManager();
+    public static ConfigManager configManager;
+    private static final TreecutterManager treecutterManager = new TreecutterManager();
 
-    public static void LogInfo(String text, Object... args){
+    public static void LogInfo(String text, Object... args) {
         LOGGER.info("Treecutter: " + text, args);
     }
 
     @Override
     public void onInitialize() {
 
-        LogInfo("Treecutter initializing");
-
         ServerLifecycleEvents.SERVER_STARTED.register(minecraftServer -> {
+            Properties defaults = new Properties();
+            defaults.setProperty(ConfigKeys.MAX_LOOPS, "16");
+            defaults.setProperty(ConfigKeys.AUTO_DESTROY_LEAVES_RANGE, "3");
+            defaults.setProperty(ConfigKeys.INCLUDE_IN_TOOL_NAME, "[tc]");
 
+            configManager = new ConfigManager(
+                    minecraftServer.getRunDirectory().resolve("config/treecutter.properties"),
+                    defaults
+            );
+            configManager.load();
+
+            treecutterManager.onServerStartup(minecraftServer);
         });
 
         PlayerBlockBreakEvents.AFTER.register((world, playerEntity, blockPos, blockState, blockEntity) -> {
@@ -36,6 +48,7 @@ public class Treecutter implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STOPPING.register(minecraftServer -> {
             treecutterManager.purge();
+            configManager = null;
         });
     }
 }

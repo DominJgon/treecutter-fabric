@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "treecutter",
+  "version": "${version}",
+  "name": "Treecutter",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/treecutter/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-datagen": [
+      "me.dominjgon.treecutter.client.TreecutterDataGenerator"
+    ],
+    "main": [
+      "me.dominjgon.treecutter.Treecutter"
+    ]
+  },
+  "mixins": [
+    "treecutter.mixins.json",
+    {
+      "config": "treecutter.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

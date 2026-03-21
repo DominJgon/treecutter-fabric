@@ -1,18 +1,12 @@
 package me.dominjgon.treecutter;
 
-import com.sun.source.tree.Tree;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SaplingBlock;
+import net.minecraft.block.*;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.joml.Vector3i;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class TreeFloodFill {
@@ -23,6 +17,7 @@ public class TreeFloodFill {
 
         boolean hasLeaves = false;
         boolean isOnSoil = false;
+        boolean containsMangroveRoots = false;
 
         Set<BlockPos> visitedLocations = new HashSet<>(maxLoops * 9);
         Set<TreeBlock> foundBlocks = new HashSet<>(maxLoops * 9);
@@ -51,6 +46,9 @@ public class TreeFloodFill {
 
                     var blockState = world.getBlockState(sampledAroundPosition);
 
+                    if(blockState.isAir())
+                        continue;
+
                     if(blockState.isIn(BlockTags.LOGS)) {
                         foundBlocks.add(new TreeBlock(sampledAroundPosition, TreeBlockType.Log));
                         nextPositionsToSample.add(sampledAroundPosition);
@@ -64,6 +62,13 @@ public class TreeFloodFill {
 //                        foundBlocks.add(new TreeBlock(sampledAroundPosition, TreeBlockType.Leaves));
 //                        nextPositionsToSample.add(sampledAroundPosition);
 //                        continue;
+                    }
+
+                    if (blockState.isOf(Blocks.MANGROVE_ROOTS) || blockState.isOf(Blocks.MUDDY_MANGROVE_ROOTS)) {
+                        containsMangroveRoots = true;
+                        foundBlocks.add(new TreeBlock(sampledAroundPosition, TreeBlockType.Roots));
+                        nextPositionsToSample.add(sampledAroundPosition);
+                        continue;
                     }
                 }
             }
@@ -89,10 +94,33 @@ public class TreeFloodFill {
             }
         }
 
-        BlockState soilBlock = world.getBlockState(new BlockPos(lowestBlock.positon.getX(), lowestBlock.positon.getY()-1, lowestBlock.positon.getZ()));
-        isOnSoil = canGrowOnBlock(soilBlock.getBlock());
+        int x = lowestBlock.positon.getX();
+        int y = lowestBlock.positon.getY();
+        int z = lowestBlock.positon.getZ();
 
-        Treecutter.LogInfo("Tree block is ({}), it's on ({}), isOnSoil ({})", lowestBlock.positon, soilBlock.getBlock().getName(), isOnSoil);
+        if(!containsMangroveRoots) {
+            --y;
+            BlockState soilBlockState = world.getBlockState(new BlockPos(x, y, z));
+            isOnSoil = canGrowOnBlock(soilBlockState.getBlock());
+        }
+
+        if(containsMangroveRoots) {
+
+            int triesLeft = 9; //TODO magic number for mangrove height, max distance i found plus two
+
+            do {
+                BlockState soilBlockState = world.getBlockState(new BlockPos(x, --y, z));
+                if (soilBlockState.isAir() || !soilBlockState.isOpaque())
+                    continue;
+
+                isOnSoil = canGrowOnBlock(soilBlockState.getBlock());
+                break;
+            } while (triesLeft-- > 0);
+        }
+
+
+
+        Treecutter.LogInfo("Tree block is ({}), it's on ({}), isOnSoil ({})", lowestBlock.positon, world.getBlockState(new BlockPos(x, y, z)).getBlock().getName(), isOnSoil);
 
         if(hasLeaves && isOnSoil)
             return foundBlocks;

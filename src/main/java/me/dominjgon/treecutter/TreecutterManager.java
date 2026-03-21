@@ -18,11 +18,13 @@ public class TreecutterManager {
     private String includeInToolName;
     private int maxLoops;
     private int maxLeafDistance;
+    private int cutterBlockBreaksPerTick;
 
     public void onServerStartup(MinecraftServer minecraftServer){
         maxLoops = Treecutter.configManager.get(ConfigKeys.MAX_LOOPS).asInt();
         maxLeafDistance = Treecutter.configManager.get(ConfigKeys.AUTO_DESTROY_LEAVES_RANGE).asInt();
         includeInToolName = Treecutter.configManager.get(ConfigKeys.INCLUDE_IN_TOOL_NAME).asString();
+        cutterBlockBreaksPerTick = Treecutter.configManager.get(ConfigKeys.CUTTER_BLOCK_BREAKS_PER_TICK).asInt();
     }
 
     public void onBreakBlock(World world, PlayerEntity playerEntity, BlockPos blockPos, BlockState blockState) {
@@ -34,7 +36,7 @@ public class TreecutterManager {
             return;
 
         Item item = playerEntity.getMainHandStack().getItem();
-        if (!(item instanceof AxeItem axe))
+        if (!(item instanceof AxeItem))
             return;
 
         if (!playerEntity.getMainHandStack().getName().getString().toLowerCase().contains(includeInToolName))
@@ -72,7 +74,7 @@ public class TreecutterManager {
 
     private void breakNextBlock(TreeCuttingOperation cuttingOperation) {
 
-        for (int index = 1; index < 5; ++index) {
+        for (int index = 1; index < cutterBlockBreaksPerTick; ++index) {
 
             var treeBlock = cuttingOperation.treeBlocks.poll();
             if (treeBlock == null)

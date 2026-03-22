@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class TreeFinderUtils {
     public static Set<TreeBlock> findAttachedTree(World world, BlockPos origin, int maxLoops) {
@@ -35,12 +36,6 @@ public class TreeFinderUtils {
             }
         }
 
-        LinkedHashSet<TreeBlock> leaves = gatherLeaves(world, foundBlocks);
-
-        //TODO debug before gather leaves exists
-//        if (leaves.isEmpty())
-//            return null;
-
         boolean containsMangroveRoots = checkForMangroveRoots(foundBlocks);
 
         boolean isOnSoil = false;
@@ -53,10 +48,18 @@ public class TreeFinderUtils {
         } else
             isOnSoil = isOnTopOfSoilMangrove(world, x, y, z);
 
-        if (isOnSoil)
-            return foundBlocks;
+        if (!isOnSoil)
+            return null;
 
-        return null;
+        LinkedHashSet<TreeBlock> leaves = gatherLeaves(world, foundBlocks);
+
+        if (leaves.isEmpty())
+            return null;
+
+        Treecutter.LogInfo("Found {} leaves blocks", leaves.size());
+        foundBlocks.addAll(leaves);
+
+        return foundBlocks;
     }
 
     private static boolean isOnTopOfSoilRegular(World world, int y, int x, int z) {
@@ -81,9 +84,46 @@ public class TreeFinderUtils {
         return false;
     }
 
-    private static LinkedHashSet<TreeBlock> gatherLeaves(World world ,Set<TreeBlock> foundBlocks) {
+    private static LinkedHashSet<TreeBlock> gatherLeaves(World world, Set<TreeBlock> foundBlocks) {
 
-        LinkedHashSet<TreeBlock> leaves = new LinkedHashSet<>();
+        LinkedHashSet<TreeBlock> leaves = new LinkedHashSet<>(foundBlocks.size() * 8);
+        Map<BlockPos, TreeBlock> bestByPos = new HashMap<>(foundBlocks.size() * 8);
+        Deque<TreeBlock> queue = new ArrayDeque<>(foundBlocks.stream().filter(item -> item.blockType.equals(TreeBlockType.Log)).toList());
+
+        Treecutter.LogInfo("Finding leaves for {} logs", queue.size());
+
+        while (!queue.isEmpty()) {
+            TreeBlock treeBlock = queue.poll();
+            List<BlockPos> traversalPositions = BlockPosOffsetUtils.orderedTraversalPositions(treeBlock.positon, false);
+
+            for (BlockPos position : traversalPositions) {
+
+                if(world.isAir(position))
+                    continue;
+
+                if (world.getBlockState(position).isIn(BlockTags.LEAVES)) {
+                    int timeToLive = treeBlock.timeToLive - 1;
+                    if (timeToLive < 0)
+                        continue;
+
+                    TreeBlock existing = bestByPos.get(position);
+
+                    if (existing == null || timeToLive > existing.timeToLive) {
+                        TreeBlock candidate = new TreeBlock(position, TreeBlockType.Leaves, timeToLive);
+                        bestByPos.put(position, candidate);
+                        leaves.remove(existing);
+                        leaves.add(candidate);
+                        queue.add(candidate);
+                    }
+                }
+            }
+        }
+
+        Treecutter.LogInfo("Queue was exhausted, found {} leaves", leaves);
+//
+//        LinkedHashSet<TreeBlock> sorted = foundBlocks.stream()
+//                .sorted(Comparator.comparingInt((TreeBlock b) -> b.timeToLive).reversed())
+//                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return leaves;
     }
@@ -132,6 +172,7 @@ public class TreeFinderUtils {
                     if (blockState.isAir())
                         continue;
 
+                    //only log can detect other log
                     if (sampledTreeBlock.blockType.equals(TreeBlockType.Log))
                         if (blockState.isIn(BlockTags.LOGS)) {
                             foundBlocks.add(new TreeBlock(subPosition, TreeBlockType.Log, maxTTL));
@@ -151,7 +192,7 @@ public class TreeFinderUtils {
                         //prevent roots from detecting up
                         if (subPosition.getY() > sampledPosition.getY())
                             continue;
-                        foundBlocks.add(new TreeBlock(subPosition, TreeBlockType.Roots, maxTTL));
+                        foundBlocks.add(new TreeBlock(subPosition, TreeBlockType.Roots, 0));
                         nextPositionsToSample.add(subPosition);
                         continue;
                     }

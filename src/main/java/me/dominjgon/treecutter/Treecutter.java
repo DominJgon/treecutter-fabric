@@ -29,9 +29,9 @@ public class Treecutter implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTED.register(minecraftServer -> {
             Properties defaults = new Properties();
             defaults.setProperty(ConfigKeys.MAX_LOOPS, "16");
-            defaults.setProperty(ConfigKeys.AUTO_DESTROY_LEAVES_RANGE, "3");
+            defaults.setProperty(ConfigKeys.AUTO_DESTROY_LEAVES, "true");
             defaults.setProperty(ConfigKeys.INCLUDE_IN_TOOL_NAME, "[tc]");
-            defaults.setProperty(ConfigKeys.LEAVES_DETECTION_TTL, "2");
+            defaults.setProperty(ConfigKeys.LEAVES_DETECTION_TTL, "3");
             defaults.setProperty(ConfigKeys.CUTTER_BLOCK_BREAKS_PER_TICK, "5");
 
             configManager = new ConfigManager(

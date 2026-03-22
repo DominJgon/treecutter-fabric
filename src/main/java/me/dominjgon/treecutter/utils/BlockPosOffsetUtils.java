@@ -49,4 +49,26 @@ public class BlockPosOffsetUtils {
 
         return positions;
     }
+
+    public static List<BlockPos> axisAlignedTraversalPositions(BlockPos center, boolean includeCenter){
+        List<BlockPos> positions = new ArrayList<>(27);
+
+        int x = center.getX();
+        int y = center.getY();
+        int z = center.getZ();
+
+        // 1. Center
+        if(includeCenter)
+            positions.add(center);
+
+        // 2. Axis-aligned (6 directions)
+        positions.add(new BlockPos(x + 1, y, z));
+        positions.add(new BlockPos(x - 1, y, z));
+        positions.add(new BlockPos(x, y + 1, z));
+        positions.add(new BlockPos(x, y - 1, z));
+        positions.add(new BlockPos(x, y, z + 1));
+        positions.add(new BlockPos(x, y, z - 1));
+
+        return positions;
+    }
 }

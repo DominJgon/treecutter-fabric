@@ -3,6 +3,7 @@ package me.dominjgon.treecutter.manaagers;
 import me.dominjgon.treecutter.Treecutter;
 import me.dominjgon.treecutter.data.ConfigKeys;
 import me.dominjgon.treecutter.data.TreeBlock;
+import me.dominjgon.treecutter.data.TreeBlockType;
 import me.dominjgon.treecutter.data.TreeCuttingOperation;
 import me.dominjgon.treecutter.utils.TreeFinderUtils;
 import net.minecraft.block.BlockState;
@@ -22,14 +23,14 @@ public class TreecutterManager {
     private static final Set<TreeCuttingOperation> cuttingOperationSet = new HashSet<>();
     private String includeInToolName;
     private int maxLoops;
-    private int maxLeafDistance;
     private int cutterBlockBreaksPerTick;
+    private boolean autoDestroyLeaves;
 
     public void onServerStartup(MinecraftServer minecraftServer){
         maxLoops = Treecutter.configManager.get(ConfigKeys.MAX_LOOPS).asInt();
-        maxLeafDistance = Treecutter.configManager.get(ConfigKeys.AUTO_DESTROY_LEAVES_RANGE).asInt();
         includeInToolName = Treecutter.configManager.get(ConfigKeys.INCLUDE_IN_TOOL_NAME).asString();
         cutterBlockBreaksPerTick = Treecutter.configManager.get(ConfigKeys.CUTTER_BLOCK_BREAKS_PER_TICK).asInt();
+        autoDestroyLeaves = Treecutter.configManager.get(ConfigKeys.AUTO_DESTROY_LEAVES).asBoolean();
     }
 
     public void onBreakBlock(World world, PlayerEntity playerEntity, BlockPos blockPos, BlockState blockState) {
@@ -86,6 +87,10 @@ public class TreecutterManager {
                 break;
             if (cuttingOperation.world.getBlockState(treeBlock.positon) == null)
                 return;
+
+            if(!autoDestroyLeaves && treeBlock.blockType.equals(TreeBlockType.Leaves))
+                return;
+
             cuttingOperation.world.breakBlock(treeBlock.positon, true);
 
         }

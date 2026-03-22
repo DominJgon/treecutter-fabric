@@ -84,7 +84,7 @@ public class TreecutterManager {
 
             var treeBlock = cuttingOperation.treeBlocks.poll();
             if (treeBlock == null)
-                break;
+                continue;
             if (cuttingOperation.world.getBlockState(treeBlock.positon) == null)
                 return;
 

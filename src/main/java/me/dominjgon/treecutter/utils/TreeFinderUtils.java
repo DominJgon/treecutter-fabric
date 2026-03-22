@@ -10,7 +10,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TreeFinderUtils {
     public static Set<TreeBlock> findAttachedTree(World world, BlockPos origin, int maxLoops) {
@@ -56,7 +55,6 @@ public class TreeFinderUtils {
         if (leaves.isEmpty())
             return null;
 
-        Treecutter.LogInfo("Found {} leaves blocks", leaves.size());
         foundBlocks.addAll(leaves);
 
         return foundBlocks;
@@ -90,8 +88,6 @@ public class TreeFinderUtils {
         Map<BlockPos, TreeBlock> bestByPos = new HashMap<>(foundBlocks.size() * 8);
         Deque<TreeBlock> queue = new ArrayDeque<>(foundBlocks.stream().filter(item -> item.blockType.equals(TreeBlockType.Log)).toList());
 
-        Treecutter.LogInfo("Finding leaves for {} logs", queue.size());
-
         while (!queue.isEmpty()) {
             TreeBlock treeBlock = queue.poll();
             List<BlockPos> traversalPositions = BlockPosOffsetUtils.orderedTraversalPositions(treeBlock.positon, false);
@@ -118,12 +114,6 @@ public class TreeFinderUtils {
                 }
             }
         }
-
-        Treecutter.LogInfo("Queue was exhausted, found {} leaves", leaves);
-//
-//        LinkedHashSet<TreeBlock> sorted = foundBlocks.stream()
-//                .sorted(Comparator.comparingInt((TreeBlock b) -> b.timeToLive).reversed())
-//                .collect(Collectors.toCollection(LinkedHashSet::new));
 
         return leaves;
     }

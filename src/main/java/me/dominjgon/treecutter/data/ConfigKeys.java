@@ -1,4 +1,4 @@
-package me.dominjgon.treecutter;
+package me.dominjgon.treecutter.data;
 
 public class ConfigKeys {
     public static String MAX_LOOPS = "maxLoops";

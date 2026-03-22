@@ -1,5 +1,10 @@
-package me.dominjgon.treecutter;
+package me.dominjgon.treecutter.manaagers;
 
+import me.dominjgon.treecutter.Treecutter;
+import me.dominjgon.treecutter.data.ConfigKeys;
+import me.dominjgon.treecutter.data.TreeBlock;
+import me.dominjgon.treecutter.data.TreeCuttingOperation;
+import me.dominjgon.treecutter.utils.TreeFinderUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
@@ -42,7 +47,7 @@ public class TreecutterManager {
         if (!playerEntity.getMainHandStack().getName().getString().toLowerCase().contains(includeInToolName))
             return;
 
-        Set<TreeBlock> treeBlockSet = TreeFloodFill.findAttachedTree(world, blockPos, maxLoops);
+        Set<TreeBlock> treeBlockSet = TreeFinderUtils.findAttachedTree(world, blockPos, maxLoops);
 
         if (treeBlockSet == null)
             return;

@@ -1,4 +1,7 @@
-package me.dominjgon.treecutter;
+package me.dominjgon.treecutter.manaagers;
+
+import me.dominjgon.treecutter.Treecutter;
+import me.dominjgon.treecutter.data.ConfigValue;
 
 import java.io.Reader;
 import java.io.Writer;

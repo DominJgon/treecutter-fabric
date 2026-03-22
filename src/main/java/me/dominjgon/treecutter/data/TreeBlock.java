@@ -1,4 +1,4 @@
-package me.dominjgon.treecutter;
+package me.dominjgon.treecutter.data;
 
 import net.minecraft.util.math.BlockPos;
 

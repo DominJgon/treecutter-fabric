@@ -1,5 +1,8 @@
 package me.dominjgon.treecutter;
 
+import me.dominjgon.treecutter.data.ConfigKeys;
+import me.dominjgon.treecutter.manaagers.ConfigManager;
+import me.dominjgon.treecutter.manaagers.TreecutterManager;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.*;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
